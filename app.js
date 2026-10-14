@@ -104,7 +104,7 @@
   // ── nav ────────────────────────────────────────────────────────────────────
   const PAGES = [
     ['index.html', 'Where I stand'], ['requisites.html', 'Requisites'], ['courses.html', 'Courses'],
-    ['calendar.html', 'Calendar'], ['gmh-track.html', 'GMH track'], ['backups.html', 'Backups'], ['log.html', 'Log'],
+    ['parcels.html', 'Parcels'], ['calendar.html', 'Calendar'], ['gmh-track.html', 'GMH track'], ['backups.html', 'Backups'], ['log.html', 'Log'],
   ];
   function renderNav() {
     const here = location.pathname.split('/').pop() || 'index.html';
@@ -146,7 +146,8 @@
         tile('Next fixed date', dl ? fmt(dl.date) : '—', dl ? dl.label : ''),
         tile('UBC MA readiness', ubc.pct + '%', ubc.done + ' of ' + ubc.total + ' requisites'),
         tile('SFU MA readiness', sfu.pct + '%', sfu.done + ' of ' + sfu.total + ' requisites'),
-        tile('Helping hours', hrs + ' / ' + D.meta.helpingHoursTarget, 'logged on the Log page', false)));
+        tile('Helping hours', hrs + ' / ' + D.meta.helpingHoursTarget, 'logged on the Log page', false),
+        (function(){ const p = D.parcels.find(p => isNow(p.start, p.end)) || D.parcels.find(p => !isPast(p.end)); if (!p) return null; const d = p.items.filter((_, i) => statusOf(p.id + '-' + i) === 'done').length; const t = tile('This quarter', d + ' / ' + p.items.length, p.theme); t.append(bar(Math.round(100*d/p.items.length))); return t; })()));
 
     // next actions
     const sec = el('div', { class: 'sec' },
@@ -338,6 +339,45 @@
         gs ? el('dt', {}, 'Linked gate') : null, gs ? el('dd', {}, 'Stage ' + gs.s.n + ' · ' + gs.g.label) : null)];
       const row = itemRow(b.id, b.order + ' · ' + b.title, b.when, body);
       const t = row.querySelector('.item-title'); t.append(' ', gateTag); if (b.verify) t.append(' ', el('span', { class: 'tag' }, 'verify'));
+      sec.append(row);
+    });
+    root.append(sec);
+  };
+
+  R.parcels = function (root) {
+    const pid = (p, i) => p.id + '-' + i;
+    const stats = p => { const done = p.items.filter((_, i) => statusOf(pid(p, i)) === 'done').length; return { done, total: p.items.length, pct: Math.round(100 * done / p.items.length) }; };
+    const cur = D.parcels.find(p => isNow(p.start, p.end)) || D.parcels.find(p => !isPast(p.end)) || D.parcels[D.parcels.length - 1];
+    const cs = stats(cur);
+    root.append(el('div', { class: 'tiles' },
+      tile('This quarter', cur.q, cur.theme),
+      tile('Parcel progress', cs.done + ' / ' + cs.total, cs.pct + '% of items'),
+      tile('Quarters closed', D.parcels.filter(p => statusOf(p.id) === 'done').length + ' / 13', 'mark a quarter closed when its condition is met'),
+      tile('Days left in quarter', Math.max(0, daysUntil(cur.end)), 'review on the last Sunday')));
+
+    const rh = el('div', { class: 'sec' }, el('div', { class: 'sec-eye' }, 'Under every quarter'), el('div', { class: 'sec-title' }, 'The standing ', el('em', {}, 'rhythm')),
+      el('ul', { class: 'list' }, D.standingRhythm.map(r => el('li', {}, r))));
+    root.append(rh);
+
+    const sec = el('div', { class: 'sec' }, el('div', { class: 'sec-eye' }, 'Thirteen parcels'),
+      el('div', { class: 'sec-title' }, 'One theme a quarter, closed on a ', el('em', {}, 'condition')),
+      el('div', { class: 'sec-desc' }, 'Tick items as they finish; the quarter\'s own status is yours to set when the closing condition is true. If a quarter runs long, the next starts late — only 1 and 31 December 2029 are fixed.'));
+    D.parcels.forEach(p => {
+      const st = stats(p), here = p.id === cur.id, past = isPast(p.end) && statusOf(p.id) !== 'done';
+      const body = el('div', { class: 'item-body', style: 'display:' + (here ? 'block' : 'none') + ';padding-left:1.1rem' });
+      p.items.forEach((t, i) => {
+        const id = pid(p, i), cb = el('input', { type: 'checkbox', style: 'margin-right:.6rem' }); cb.checked = statusOf(id) === 'done';
+        cb.addEventListener('change', () => { item(id).status = cb.checked ? 'done' : 'todo'; save(); rerender(); });
+        body.append(el('label', { style: 'display:block;padding:.35rem 0;border-bottom:1px solid var(--line);font-size:.92rem;color:' + (cb.checked ? 'var(--faint)' : 'var(--ink)') + (cb.checked ? ';text-decoration:line-through' : '') }, cb, t));
+      });
+      body.append(el('dl', { style: 'margin-top:.8rem' }, el('dt', {}, 'Closed when'), el('dd', {}, p.closed)), noteBox(p.id, 'Review note for this quarter'));
+      const row = el('div', { class: 'item ' + statusOf(p.id) },
+        el('div', { class: 'item-head', style: 'cursor:pointer', onclick: e => { if (e.target.closest('.status')) return; body.style.display = body.style.display === 'none' ? 'block' : 'none'; } },
+          statusControl(p.id),
+          el('div', {}, el('div', { class: 'item-title' }, p.q + ' · ' + p.theme, here ? el('span', { class: 'tag now', style: 'margin-left:.6rem' }, 'This quarter') : null, past ? el('span', { class: 'tag late', style: 'margin-left:.6rem' }, 'Ran long') : null),
+            el('div', { class: 'item-sub' }, st.done + ' of ' + st.total + ' items · ' + p.closed), bar(st.pct, statusOf(p.id) === 'done')),
+          el('span', { class: 'due' }, fmt(p.end))),
+        body);
       sec.append(row);
     });
     root.append(sec);
