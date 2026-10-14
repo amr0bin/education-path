@@ -13,6 +13,21 @@ window.EDU = {
     helpingHoursTargetSFU: 400,
   },
 
+  // ── The ceiling: what excellence looks like. Shown first on the dashboard; the stages serve it. ──
+  ceiling: {
+    headline: "A registered clinician and doctoral researcher whose specialism is disability: able to hold a clinical hour with a student whose mood is flattening, read that student's programme's essential requirements and say precisely why they are indefensible, and produce the evidence that changes them.",
+    seats: [
+      "A university centre where access and mental health share one intake — proposed, funded and led",
+      "Director-level leadership in accessibility, equity or counselling services, setting policy on essential requirements for every programme at once",
+      "A funded research programme with doctoral students, and in time a research chair on disability, accommodation and depression",
+      "Standards and regulatory seats that rewrite essential requirements for every cohort that follows",
+      "The lectern: faculty or adjunct teaching, and clinical supervision of the next generation",
+      "Therapeutic Studio, sized by desire, at psychologist scope",
+      "The studio: Dear Ordinary shown, funded and taught from",
+    ],
+    horizon: "Inside institutions until 75 if health permits, studying for a lifetime; then, financially free, only the private practice, the art practice and some consultation. Excellence is the whole arc held together, not any single seat.",
+  },
+
   // ── Stages and the condition that closes each one ──────────────────────────
   stages: [
     { id: "s1", n: 1, name: "Ground", window: "Now → mid-2027",
@@ -67,12 +82,17 @@ window.EDU = {
         { id: "s5-defence",    label: "Dissertation defended", due: "2039-08-31" },
         { id: "s5-register",   label: "CHCPBC psychologist registration applied for (EPPP + oral exam)", due: "2039-12-31" },
       ]},
-    { id: "s6", n: 6, name: "Optionality", window: "2039 →",
-      closes: "This stage does not close. Review twice a year: are all seats still held, and is any one becoming full-time at the others' expense?",
+    { id: "s6", n: 6, name: "Optionality", window: "2039 → 2056 (age 75), then by choice",
+      closes: "This stage does not close. Institutional work continues to 75 if health permits; then, financially free, only the practice, the studio and some consultation. Review twice a year: are all seats still held, and is any one becoming full-time at the others' expense?",
       gates: [
-        { id: "s6-adjunct", label: "Sessional, then adjunct, appointment", due: "2041-01-01" },
-        { id: "s6-centre",  label: "Proposal for a joined access-and-mental-health centre, with a sponsor", due: "2042-01-01" },
-        { id: "s6-practice",label: "Therapeutic Studio sized by desire", due: "2040-01-01" },
+        { id: "s6-adjunct",  label: "Sessional, then adjunct, appointment in a counselling or art department", due: "2041-01-01" },
+        { id: "s6-centre",   label: "Proposal for a joined access-and-mental-health centre, with a sponsor, funded and led", due: "2043-01-01" },
+        { id: "s6-director", label: "Director-level seat in accessibility, equity or counselling services", due: "2044-01-01" },
+        { id: "s6-research", label: "Funded research programme with doctoral students; research chair nomination on disability, accommodation and depression", due: "2046-01-01" },
+        { id: "s6-standards",label: "Standards and regulatory seats that rewrite essential requirements for every cohort that follows", due: "2045-01-01" },
+        { id: "s6-practice", label: "Therapeutic Studio sized by desire; the studio shown, funded and taught from", due: "2040-01-01" },
+        { id: "s6-freedom",  label: "Financial freedom in place so that the post-75 shape is a choice, not a necessity", due: "2056-01-01" },
+        { id: "s6-75",       label: "Institutional work held to 75, health permitting; then the practice, the studio and some consultation", due: "2056-06-30" },
       ]},
   ],
 

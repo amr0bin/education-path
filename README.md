@@ -8,7 +8,7 @@ Open `index.html` in a browser, or publish the folder with GitHub Pages. No buil
 
 | File | What it is for | Open it when |
 | --- | --- | --- |
-| `index.html` — **Where I stand** | Today's date against the six-stage path; the next seven dated actions across every page; readiness toward the UBC MA and SFU MA; helping hours. Computed from everything else. | Every week. This is the screen that replaces re-reading the plan. |
+| `index.html` — **Where I stand** | Leads with the ceiling — what excellence looks like — then today's date against the six-stage path; the next seven dated actions across every page; readiness toward the UBC MA and SFU MA; helping hours. Computed from everything else. | Every week. This is the screen that replaces re-reading the plan. |
 | `requisites.html` | The twelve requisites the UBC MA, SFU MA and UBC PhD read, each mapped to what is held and what is still to earn. Course-linked requisites turn done when their course does. | When an application question comes up, or a requirement changes. |
 | `courses.html` | The six prerequisite courses, one per term, with the chosen course, its fallback, the registration deadline, grade and "outline kept". | At each registration window; the day a grade arrives. |
 | `parcels.html` | Thirteen quarterly parcels, Oct 2026 → Dec 2029: one theme, three to five tickable items and a closing condition each, with the current quarter open. | At the start and end of each quarter; weekly to tick items. |
@@ -27,6 +27,7 @@ Status (to do / in progress / done), notes, grades, hours and decisions live in 
 
 - Program facts were verified on 14 October 2026 against the pages listed in `EDU.sources` at the bottom of `data.js`. Re-check each spring; term offerings for 2027–2029 are not yet published.
 - Items marked **verify** in the calendar carry a date that could not be confirmed from a single source (the LSHTM GHM202 13 December window; the Leeds application close).
+- `EDU.ceiling` in `data.js` is the standard every page serves: the whole arc to 75 and beyond. Edit it when the ceiling changes; it is shown first on the dashboard on purpose.
 - The stage gates are the closing conditions from the career repository's *My Vision* and *The Sequence*, with due dates added so they sort. Due dates are targets, not rules; the plan is keyed to conditions.
 
 ## What is deliberately not here

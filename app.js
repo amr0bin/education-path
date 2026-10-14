@@ -135,6 +135,11 @@
 
   R.index = function (root) {
     const cur = currentStage();
+    root.append(el('div', { class: 'ceiling' },
+      el('div', { class: 'sec-eye' }, 'The ceiling · what excellence looks like'),
+      el('p', { class: 'ceiling-head' }, D.ceiling.headline),
+      el('ul', { class: 'ceiling-seats' }, D.ceiling.seats.map(x => el('li', {}, x))),
+      el('p', { class: 'ceiling-horizon' }, D.ceiling.horizon)));
     const dl = D.deadlines.filter(d => daysUntil(d.date) >= 0)[0];
     const ubc = schoolReadiness('ubc'), sfu = schoolReadiness('sfu');
     const hrs = hoursTotal(h => !/Research|Other/.test(h.source));
