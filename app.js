@@ -101,10 +101,33 @@
   function bar(pct, done) { return el('div', { class: 'bar' + (done ? ' done' : '') }, el('span', { style: 'width:' + pct + '%' })); }
   function tile(k, v, s, late) { return el('div', { class: 'tile' + (late ? ' late' : '') }, el('div', { class: 'k' }, k), el('div', { class: 'v' }, v), s ? el('div', { class: 's' }, s) : null); }
 
+  // ── transcript inventory (private.js, optional) ──────────────────────────
+  function transcriptSection() {
+    const T = D.transcript; if (!T) return el('p', { class: 'note' }, 'No transcript inventory loaded (private.js is absent). Add it locally to see the GPA arithmetic.');
+    const newSenior = D.courses.filter(c => c.level >= 300);
+    const plannedCr = newSenior.reduce((n, c) => n + (c.id === 'c6' ? 4 : 3), 0);
+    const gpAfter = ((T.senior.gpa * T.senior.credits) + 4.0 * plannedCr) / (T.senior.credits + plannedCr);
+    const aCredits = newSenior.filter(c => /^A/.test((S.grades[c.id] || '').trim())).reduce((n, c) => n + (c.id === 'c6' ? 4 : 3), 0);
+    const sec = el('div', { class: 'sec' },
+      el('div', { class: 'sec-eye' }, 'Transcript inventory'),
+      el('div', { class: 'sec-title' }, 'What the record ', el('em', {}, 'holds'), ', and the arithmetic it sets'),
+      el('div', { class: 'sec-desc' }, T.institution + ' · ' + T.degree + ' · ' + T.credits + ' credits · CGPA ' + T.cgpa + ' on a ' + T.scale + ' scale. None of the six prerequisites is satisfied; all six are to earn.'));
+    sec.append(el('div', { class: 'tiles' },
+      tile('Senior GPA now', T.senior.gpa.toFixed(2), T.senior.credits + ' credits at 300/400 level; UBC asks 3.33', true),
+      tile('Last 60 credits', T.last60.gpa.toFixed(2), 'SFU asks 3.0 overall or 3.33 on the last 60', true),
+      tile('Senior GPA after six A grades', gpAfter.toFixed(2), plannedCr + ' new senior credits at 4.0 — still short of 3.33 overall'),
+      tile('A-range senior credits, in field', aCredits + ' / 12', 'UBC\'s alternative minimum: 12 at 80%+ (from grades on Courses)')));
+    sec.append(el('p', { class: 'note' }, 'Six courses cannot lift my overall senior average to B+, so my file rests on UBC\'s alternative minimum — at least 12 credits of 300/400-level courses in the field at 80% or higher — and on SFU\'s last-60-units rule, which the same courses lift to about 3.3. Both require every new course to be an A. That is why I take the 300/400-level version of each prerequisite where one exists (EPSE 482 over MATH 215; EDUC 322 or 464 over PSYC 250), and why one or two further senior electives at A are worth considering: PSYC 312 History of Psychology also covers a PhD core area. UBC\'s provision for applicants with significant formal training and relevant professional experience is the third leg; fifteen years of practice, the CPACC, the Leeds MSc and my published record are what it reads. Sources: ', el('a', { href: 'https://grad.ubc.ca/node/10001', target: '_blank', rel: 'noopener' }, 'UBC minimum academic requirements'), ' (the B+ senior average); ', el('a', { href: 'https://gradstudies.ok.ubc.ca/admission-requirements/', target: '_blank', rel: 'noopener' }, 'UBC Okanagan College of Graduate Studies'), ' (the 12-credit A-range alternative and the professional-experience provision — the Vancouver Calendar wording is still to verify); ', el('a', { href: 'https://www.sfu.ca/content/sfu/education/programs/graduate-studies/masters/couns-psych/application-tuition.html', target: '_blank', rel: 'noopener' }, 'SFU application page'), ' (3.0 CGPA or 3.33 on the last 60 units).'));
+    const t = el('table', {}, el('thead', {}, el('tr', {}, ['Prerequisite', 'On the transcript'].map(h => el('th', {}, h)))));
+    const tb = el('tbody'); T.prerequisites.forEach(([k, v]) => tb.append(el('tr', {}, el('td', {}, k), el('td', {}, v)))); t.append(tb); sec.append(t);
+    sec.append(el('p', { class: 'note', style: 'margin-top:.8rem' }, 'Both programs require official transcripts from every institution I have attended, whether or not I discuss them. I order them early.'));
+    return sec;
+  }
+
   // ── nav ────────────────────────────────────────────────────────────────────
   const PAGES = [
     ['index.html', 'Where I stand'], ['requisites.html', 'Requisites'], ['courses.html', 'Courses'],
-    ['parcels.html', 'Parcels'], ['calendar.html', 'Calendar'], ['gmh-track.html', 'GMH track'], ['backups.html', 'Backups'], ['log.html', 'Log'],
+    ['parcels.html', 'Parcels'], ['calendar.html', 'Calendar'], ['gmh-track.html', 'GMH track'], ['backups.html', 'Backups'], ['knowledge.html', 'Knowledge'], ['log.html', 'Log'],
   ];
   function renderNav() {
     const here = location.pathname.split('/').pop() || 'index.html';
@@ -151,14 +174,15 @@
         tile('Next fixed date', dl ? fmt(dl.date) : '—', dl ? dl.label : ''),
         tile('UBC MA readiness', ubc.pct + '%', ubc.done + ' of ' + ubc.total + ' requisites'),
         tile('SFU MA readiness', sfu.pct + '%', sfu.done + ' of ' + sfu.total + ' requisites'),
-        tile('Helping hours', hrs + ' / ' + D.meta.helpingHoursTarget, 'logged on the Log page', false),
+        tile('Helping hours', hrs + ' / ' + D.meta.helpingHoursTarget, 'from the Log page', false),
+        (function(){ if (!D.transcript) return null; const ns = D.courses.filter(c => c.level >= 300); const ac = ns.filter(c => /^A/.test((S.grades[c.id] || '').trim())).reduce((n, c) => n + (c.id === 'c6' ? 4 : 3), 0); return tile('Senior A credits', ac + ' / 12', 'UBC alternative minimum; from grades on Courses'); })(),
         (function(){ const p = D.parcels.find(p => isNow(p.start, p.end)) || D.parcels.find(p => !isPast(p.end)); if (!p) return null; const d = p.items.filter((_, i) => statusOf(p.id + '-' + i) === 'done').length; const t = tile('This quarter', d + ' / ' + p.items.length, p.theme); t.append(bar(Math.round(100*d/p.items.length))); return t; })()));
 
     // next actions
     const sec = el('div', { class: 'sec' },
       el('div', { class: 'sec-eye' }, 'Act now'),
       el('div', { class: 'sec-title' }, 'The next ', el('em', {}, 'seven'), ' things, by date'),
-      el('div', { class: 'sec-desc' }, 'Every open gate and course registration across the path, sorted by its date. Mark things done here or on their own page.'));
+      el('div', { class: 'sec-desc' }, 'Every open gate and course registration across the path, sorted by date. I mark things done here or on their own page.'));
     nextActions(7).forEach(a => sec.append(itemRow(a.id, a.label, a.stage ? 'Stage ' + a.stage.n + ' · ' + a.stage.name : 'Course registration', [], a.due, a.optional, true)));
     root.append(sec);
 
@@ -184,10 +208,11 @@
   R.requisites = function (root) {
     const schools = [['ubc', 'UBC MA'], ['sfu', 'SFU MA'], ['phd', 'UBC PhD']];
     root.append(el('div', { class: 'tiles' }, schools.map(([k, n]) => { const r = schoolReadiness(k); const t = tile(n, r.pct + '%', r.done + ' of ' + r.total + ' requisites'); t.append(bar(r.pct, r.pct === 100)); return t; })));
+    root.append(transcriptSection());
     const sec = el('div', { class: 'sec' },
       el('div', { class: 'sec-eye' }, 'Requisites'),
       el('div', { class: 'sec-title' }, 'What each program reads, what is ', el('em', {}, 'held'), ', what is still to earn'),
-      el('div', { class: 'sec-desc' }, 'A requisite tied to a course turns done when that course is marked done on the Courses page. The others you mark here, with the evidence in the note.'));
+      el('div', { class: 'sec-desc' }, 'A requisite tied to a course turns done when I mark that course done on the Courses page. The others I mark here, with the evidence in the note.'));
     D.requisites.forEach(r => {
       const tags = el('div', { style: 'display:flex;gap:.3rem;margin-bottom:.5rem' }, r.schools.map(s => el('span', { class: 'tag ' + s }, s.toUpperCase())));
       const body = [tags, el('dl', {},
@@ -213,7 +238,7 @@
     const sec = el('div', { class: 'sec' },
       el('div', { class: 'sec-eye' }, 'One per term'),
       el('div', { class: 'sec-title' }, 'Six courses, chosen for ', el('em', {}, 'interest'), ', serving both schools'),
-      el('div', { class: 'sec-desc' }, 'Record the grade and tick "outline kept" the day you enrol: UBC asks for outlines of any course not on its table. A course here outranks a Leeds module when they collide.'));
+      el('div', { class: 'sec-desc' }, 'I record the grade and tick "outline kept" the day I enrol: UBC asks for outlines of any course not on its equivalency table. A course here outranks a Leeds module when they collide.'));
     D.courses.forEach(c => {
       const g = el('input', { type: 'text', placeholder: 'Grade' , style: 'width:6rem;margin-right:.6rem' }); g.value = S.grades[c.id] || '';
       g.addEventListener('input', () => { S.grades[c.id] = g.value; save(); });
@@ -242,15 +267,9 @@
     });
     root.append(el('div', { class: 'sec' },
       el('div', { class: 'sec-eye' }, 'Oct 2026 → Dec 2029'),
-      el('div', { class: 'sec-title' }, 'Term by term, with ', el('em', {}, 'you are here'), ' marked'),
+      el('div', { class: 'sec-title' }, 'Thirteen quarters, with the ', el('em', {}, 'current one'), ' marked'),
       strip, labels));
-    const tbl = el('table', {}, el('thead', {}, el('tr', {}, ['Term', 'Prerequisite course', 'Leeds MSc', 'Research & hours', 'GMH track', 'Fixed dates'].map(h => el('th', {}, h)))));
-    const tb = el('tbody');
-    D.calendar.forEach(t => tb.append(el('tr', { class: (isNow(t.start, t.end) ? 'here' : '') + (t.clear ? ' clear' : '') + (isPast(t.end) ? ' past' : '') },
-      [t.term, t.course, t.leeds, t.research, t.gmh, t.fixed].map(v => el('td', {}, v)))));
-    tbl.append(tb); root.append(el('div', { class: 'sec' }, tbl));
-    root.append(el('p', { class: 'note', style: 'margin-top:1rem' }, 'If the Leeds start moves to March 2027, module 1 lands on the statistics term; take statistics in autumn 2026 through Athabasca\'s any-month start and leave the rest unchanged.'));
-
+    root.append(el('p', { class: 'note', style: 'margin-top:-1rem;margin-bottom:1rem' }, 'What each term holds is on the Parcels page; this page keeps only the shape of the three years and the dates that belong to someone else. If Leeds starts in March 2027 rather than September, module 1 lands on the statistics term; I take statistics in autumn 2026 instead and leave the rest unchanged.'));
     const dls = el('ul', { class: 'dl' });
     D.deadlines.forEach(d => { const n = daysUntil(d.date); dls.append(el('li', { class: n < 0 ? 'passed' : '' },
       el('span', { class: 'd' }, fmt(d.date)), el('span', { class: 'in' + (n < 0 ? ' late' : n <= 45 ? ' soon' : '') }, inWords(n)),
@@ -263,7 +282,7 @@
     const ex = g2.examDate ? daysUntil(addYears(g2.examDate, 3)) : null;
     root.append(el('div', { class: 'tiles' },
       tile('Rungs done', D.gmh.filter(g => statusOf(g.id) === 'done').length + ' / 5', 'optional, stackable'),
-      tile('GHM202 transfer clock', g2.examDate ? fmt(addYears(g2.examDate, 3)) : '—', g2.examDate ? inWords(ex) + ' · 3 years from assessment' : 'set the exam date on rung 2', ex !== null && ex < 0)));
+      tile('GHM202 transfer clock', g2.examDate ? fmt(addYears(g2.examDate, 3)) : '—', g2.examDate ? inWords(ex) + ' · 3 years from assessment' : 'exam date set on rung 2', ex !== null && ex < 0)));
     const ul = el('ul', { class: 'ladder' });
     D.gmh.forEach(g => {
       const li = el('li', {}, el('div', { class: 'r' }, g.rung),
@@ -300,7 +319,7 @@
     f.append(el('div', {}, el('label', {}, 'Date'), date), el('div', {}, el('label', {}, 'Source'), src), el('div', {}, el('label', {}, 'Hours'), hrs), el('button', { class: 'btn', type: 'submit' }, 'Add'));
     f.append(el('div', { style: 'grid-column:1/-1' }, el('label', {}, 'Reflection'), note));
     f.addEventListener('submit', e => { e.preventDefault(); if (!hrs.value) return; S.hours.push({ date: date.value, source: src.value, hours: Number(hrs.value), note: note.value }); save(); rerender(); });
-    const hsec = el('div', { class: 'sec' }, el('div', { class: 'sec-eye' }, 'Hours'), el('div', { class: 'sec-title' }, 'Every hour, with a line of ', el('em', {}, 'reflection')), el('div', { class: 'sec-desc' }, 'Mirrors UBC\'s Para-Counselling Experience Chart so the chart in November 2029 is an export, not a reconstruction. Export from the nav to keep a copy.'), f);
+    const hsec = el('div', { class: 'sec' }, el('div', { class: 'sec-eye' }, 'Hours'), el('div', { class: 'sec-title' }, 'Every hour, with a line of ', el('em', {}, 'reflection')), el('div', { class: 'sec-desc' }, 'Mirrors UBC\'s Para-Counselling Experience Chart, so the chart in November 2029 is an export rather than a reconstruction.'), f);
     if (S.hours.length) {
       const t = el('table', {}, el('thead', {}, el('tr', {}, ['Date', 'Source', 'Hours', 'Reflection', ''].map(h => el('th', {}, h)))));
       const tb = el('tbody');
@@ -333,7 +352,7 @@
     const sec = el('div', { class: 'sec' },
       el('div', { class: 'sec-eye' }, 'Each gate, with its exits'),
       el('div', { class: 'sec-title' }, 'What still ', el('em', {}, 'contributes'), ' if a gate stays shut'),
-      el('div', { class: 'sec-desc' }, 'Status here means the bottleneck itself: To do = not yet reached; In progress = a backup is in use; Done = passed. The linked gate\'s own status shows on the right. Items marked verify have not been confirmed against a program page.'));
+      el('div', { class: 'sec-desc' }, 'Status here is the bottleneck itself: To do = not yet reached; In progress = a backup is in use; Done = passed. The linked gate\'s own status shows beside the title. Items marked verify are not yet confirmed against a program page.'));
     D.backups.forEach(b => {
       const gs = b.gate ? gateOf(b.gate) : null;
       const gateTag = gs ? el('span', { class: 'tag ' + (statusOf(b.gate) === 'done' ? 'now' : '') }, 'Gate: ' + (statusOf(b.gate) === 'done' ? 'met' : statusOf(b.gate) === 'doing' ? 'in progress' : 'open')) : el('span', { class: 'tag opt' }, 'No single gate');
@@ -357,7 +376,7 @@
     root.append(el('div', { class: 'tiles' },
       tile('This quarter', cur.q, cur.theme),
       tile('Parcel progress', cs.done + ' / ' + cs.total, cs.pct + '% of items'),
-      tile('Quarters closed', D.parcels.filter(p => statusOf(p.id) === 'done').length + ' / 13', 'mark a quarter closed when its condition is met'),
+      tile('Quarters closed', D.parcels.filter(p => statusOf(p.id) === 'done').length + ' / 13', 'closed when its condition is met'),
       tile('Days left in quarter', Math.max(0, daysUntil(cur.end)), 'review on the last Sunday')));
 
     const rh = el('div', { class: 'sec' }, el('div', { class: 'sec-eye' }, 'Under every quarter'), el('div', { class: 'sec-title' }, 'The standing ', el('em', {}, 'rhythm')),
@@ -366,7 +385,7 @@
 
     const sec = el('div', { class: 'sec' }, el('div', { class: 'sec-eye' }, 'Thirteen parcels'),
       el('div', { class: 'sec-title' }, 'One theme a quarter, closed on a ', el('em', {}, 'condition')),
-      el('div', { class: 'sec-desc' }, 'Tick items as they finish; the quarter\'s own status is yours to set when the closing condition is true. If a quarter runs long, the next starts late — only 1 and 31 December 2029 are fixed.'));
+      el('div', { class: 'sec-desc' }, 'I tick items as they finish and set the quarter\'s own status when its closing condition is true. If a quarter runs long, the next starts late; only 1 and 31 December 2029 are fixed.'));
     D.parcels.forEach(p => {
       const st = stats(p), here = p.id === cur.id, past = isPast(p.end) && statusOf(p.id) !== 'done';
       const body = el('div', { class: 'item-body', style: 'display:' + (here ? 'block' : 'none') + ';padding-left:1.1rem' });
@@ -382,6 +401,42 @@
           el('div', {}, el('div', { class: 'item-title' }, p.q + ' · ' + p.theme, here ? el('span', { class: 'tag now', style: 'margin-left:.6rem' }, 'This quarter') : null, past ? el('span', { class: 'tag late', style: 'margin-left:.6rem' }, 'Ran long') : null),
             el('div', { class: 'item-sub' }, st.done + ' of ' + st.total + ' items · ' + p.closed), bar(st.pct, statusOf(p.id) === 'done')),
           el('span', { class: 'due' }, fmt(p.end))),
+        body);
+      sec.append(row);
+    });
+    root.append(sec);
+  };
+
+  R.knowledge = function (root) {
+    const K = D.knowledge || [];
+    const aid = (k, i) => k.id + '-a' + i;
+    const read = k => k.anchors.filter((_, i) => statusOf(aid(k, i)) === 'done').length;
+    const totalA = K.reduce((n, k) => n + k.anchors.length, 0), readA = K.reduce((n, k) => n + read(k), 0);
+    root.append(el('div', { class: 'tiles' },
+      tile('Areas held', K.filter(k => statusOf(k.id) === 'done').length + ' / ' + K.length, 'done when its test is true'),
+      tile('Anchor texts read', readA + ' / ' + totalA, 'ticked as read'),
+      tile('Orientation articles', K.length, 'maps, not citations')));
+    root.append(el('p', { class: 'note', style: 'margin-bottom:1.6rem' }, D.knowledgeNote));
+    const sec = el('div', { class: 'sec' }, el('div', { class: 'sec-eye' }, 'Ten bodies of knowledge'), el('div', { class: 'sec-title' }, 'In order of the credibility each ', el('em', {}, 'buys'), ' on this path'));
+    K.forEach(k => {
+      const body = el('div', { class: 'item-body', style: 'display:none;padding-left:1.1rem' });
+      body.append(el('dl', {}, el('dt', {}, 'Why it matters here'), el('dd', {}, k.why), el('dt', {}, 'Read in'), el('dd', {}, k.stage)));
+      body.append(el('div', { class: 'sec-eye', style: 'margin-top:1rem' }, 'Anchor texts'));
+      k.anchors.forEach(([who, what, yr], i) => {
+        const id = aid(k, i), cb = el('input', { type: 'checkbox', style: 'margin-right:.6rem' }); cb.checked = statusOf(id) === 'done';
+        cb.addEventListener('change', () => { item(id).status = cb.checked ? 'done' : 'todo'; save(); rerender(); });
+        body.append(el('label', { style: 'display:block;padding:.3rem 0;border-bottom:1px solid var(--line);font-size:.88rem;color:' + (cb.checked ? 'var(--faint)' : 'var(--ink)') }, cb, who + ' — ' + what + ' (' + yr + ')'));
+      });
+      body.append(el('dl', { style: 'margin-top:1rem' },
+        el('dt', {}, 'Feeds'), el('dd', {}, el('ul', { class: 'list', style: 'padding-left:1.1rem' }, k.feeds.map(f => el('li', {}, f)))),
+        el('dt', {}, 'You have it when'), el('dd', {}, k.test),
+        el('dt', {}, 'Project article'), el('dd', {}, el('span', { style: 'font-style:italic' }, k.article), el('div', { class: 'note', style: 'margin-top:.3rem' }, k.articleNote)),
+        el('dt', {}, 'The gap'), el('dd', {}, k.gap)), noteBox(k.id, 'Your own notes on this area'));
+      const row = el('div', { class: 'item ' + statusOf(k.id) },
+        el('div', { class: 'item-head', style: 'cursor:pointer', onclick: e => { if (e.target.closest('.status')) return; body.style.display = body.style.display === 'none' ? 'block' : 'none'; } },
+          statusControl(k.id),
+          el('div', {}, el('div', { class: 'item-title' }, k.n + ' · ' + k.title), el('div', { class: 'item-sub' }, read(k) + ' of ' + k.anchors.length + ' anchors read · ' + k.stage), bar(Math.round(100 * read(k) / k.anchors.length), statusOf(k.id) === 'done')),
+          el('span', { class: 'due' }, k.anchors.length + ' texts')),
         body);
       sec.append(row);
     });
