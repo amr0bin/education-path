@@ -81,7 +81,7 @@ window.EDU = {
   requisites: [
     { id: "r-gpa", label: "Senior-course GPA", schools: ["ubc","sfu","phd"],
       ubc: "B+ (3.33) in 300/400-level courses; higher in practice", sfu: "3.0 CGPA, or 3.33 on last 60 units", phd: "80%+ average in the thesis MA",
-      held: "BFA (Emily Carr); two research-based years in neurobiology (Dalhousie)",
+      held: "BFA (Emily Carr)",
       earn: "A grades in all six new courses — they become the most recent senior record" },
     { id: "r-theories", label: "Counselling theories course", schools: ["ubc","sfu"],
       ubc: "CNPS 365 or equivalent on the table", sfu: "EDUC 323", phd: "—",
@@ -106,7 +106,7 @@ window.EDU = {
       held: "Years of Make Space facilitation", earn: "Crisis line 110 + 32 + 250 h; advisor role logged from day one" },
     { id: "r-research", label: "Research experience", schools: ["ubc","sfu","phd"],
       ubc: "RA work, honours project, presentations, publications", sfu: "Research Statement naming supervisors and methods", phd: "Completed thesis; publications strengthen",
-      held: "Neurobiology research years; four written resources; conceptual paper draft", earn: "2–3 years in a lab; conceptual paper and corpus study submitted" },
+      held: "Four written resources; conceptual paper draft", earn: "2–3 years in a lab; conceptual paper and corpus study submitted" },
     { id: "r-supervisor", label: "Supervisor fit", schools: ["ubc","sfu","phd"],
       ubc: "Declared area with available supervisory expertise (Dunn, Bedi, Park)", sfu: "Named supervisors (Jordan, Domene…)", phd: "Named supervisor; no prior commitment required",
       held: "—", earn: "Letters by March 2027; thesis question shaped to one lab by end of 2028" },
@@ -115,7 +115,7 @@ window.EDU = {
       held: "—", earn: "Lab PI (academic), Leeds project supervisor (academic), Crisis Centre or advisor-role supervisor (professional)" },
     { id: "r-phd-extra", label: "PhD-only graduate prerequisites", schools: ["phd"],
       ubc: "—", sfu: "—", phd: "Psychology of oppression, career/vocational, social-cultural, biological bases, history of psychology, cognitive assessment, ethics, interventions",
-      held: "Neurobiology covers biological bases", earn: "Leeds 5101M/5201M (oppression); MA electives CNPS 574/594; PSYC 312 if a gap remains" },
+      held: "—", earn: "Leeds 5101M/5201M (oppression); MA electives CNPS 574/594; two senior UG courses or one graduate course for biological bases and history (PSYC 312)" },
   ],
 
   // ── The six prerequisite courses, one per term ───────────────────────────────
