@@ -104,7 +104,7 @@
   // ── nav ────────────────────────────────────────────────────────────────────
   const PAGES = [
     ['index.html', 'Where I stand'], ['requisites.html', 'Requisites'], ['courses.html', 'Courses'],
-    ['calendar.html', 'Calendar'], ['gmh-track.html', 'GMH track'], ['log.html', 'Log'],
+    ['calendar.html', 'Calendar'], ['gmh-track.html', 'GMH track'], ['backups.html', 'Backups'], ['log.html', 'Log'],
   ];
   function renderNav() {
     const here = location.pathname.split('/').pop() || 'index.html';
@@ -315,6 +315,32 @@
       dsec.append(ul);
     }
     root.append(dsec);
+  };
+
+  R.backups = function (root) {
+    const gateOf = id => { for (const s of D.stages) { const g = s.gates.find(x => x.id === id); if (g) return { g, s }; } return null; };
+    const live = D.backups.filter(b => b.gate && statusOf(b.gate) !== 'done').length;
+    root.append(el('div', { class: 'tiles' },
+      tile('Bottlenecks', D.backups.length, 'in the order they are met'),
+      tile('Still ahead', live, 'gate not yet met'),
+      tile('Backups activated', D.backups.filter(b => statusOf(b.id) === 'doing').length, 'marked In progress below')));
+    const sec = el('div', { class: 'sec' },
+      el('div', { class: 'sec-eye' }, 'Each gate, with its exits'),
+      el('div', { class: 'sec-title' }, 'What still ', el('em', {}, 'contributes'), ' if a gate stays shut'),
+      el('div', { class: 'sec-desc' }, 'Status here means the bottleneck itself: To do = not yet reached; In progress = a backup is in use; Done = passed. The linked gate\'s own status shows on the right. Items marked verify have not been confirmed against a program page.'));
+    D.backups.forEach(b => {
+      const gs = b.gate ? gateOf(b.gate) : null;
+      const gateTag = gs ? el('span', { class: 'tag ' + (statusOf(b.gate) === 'done' ? 'now' : '') }, 'Gate: ' + (statusOf(b.gate) === 'done' ? 'met' : statusOf(b.gate) === 'doing' ? 'in progress' : 'open')) : el('span', { class: 'tag opt' }, 'No single gate');
+      const body = [el('dl', {},
+        el('dt', {}, 'Primary'), el('dd', {}, b.primary),
+        el('dt', {}, 'Backups'), el('dd', {}, el('ol', { class: 'list', style: 'padding-left:1.1rem' }, b.backups.map(x => el('li', {}, x)))),
+        el('dt', {}, 'Still contributes'), el('dd', {}, b.contributes),
+        gs ? el('dt', {}, 'Linked gate') : null, gs ? el('dd', {}, 'Stage ' + gs.s.n + ' · ' + gs.g.label) : null)];
+      const row = itemRow(b.id, b.order + ' · ' + b.title, b.when, body);
+      const t = row.querySelector('.item-title'); t.append(' ', gateTag); if (b.verify) t.append(' ', el('span', { class: 'tag' }, 'verify'));
+      sec.append(row);
+    });
+    root.append(sec);
   };
 
   // ── boot ───────────────────────────────────────────────────────────────────

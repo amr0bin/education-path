@@ -13,6 +13,7 @@ Open `index.html` in a browser, or publish the folder with GitHub Pages. No buil
 | `courses.html` | The six prerequisite courses, one per term, with the chosen course, its fallback, the registration deadline, grade and "outline kept". | At each registration window; the day a grade arrives. |
 | `calendar.html` | Term-by-term grid Oct 2026 → Dec 2029 with "you are here", and every fixed external date with a countdown. | At the start of each term. |
 | `gmh-track.html` | The Global Mental Health ladder — five optional, stackable rungs with the decision rules and the three-year transfer clock on GHM202. | Whenever competitiveness seems to call for another credential: the rules say whether it does. |
+| `backups.html` | Thirteen bottlenecks in the order they are met, each with the primary route, its backups, what still contributes, and the stage gate it sits on. | When a gate goes against you — before deciding anything. |
 | `log.html` | Helping hours with a line of reflection each (mirrors UBC's Para-Counselling Experience Chart) and a one-line decision log. | After every shift, session or decision. |
 | `data.js` | The single source of truth: stages and gates, requisites, courses, calendar, deadlines, GMH rungs, sources. | When a program changes a requirement or date. Edit here; every page updates. |
 | `app.js`, `style.css` | Shared behaviour and style. | Rarely. |
